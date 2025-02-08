@@ -1,0 +1,55 @@
+import pygame
+import sys
+from PIL import Image
+import numpy as np
+
+# Initialize Pygame
+pygame.init()
+
+# Set up the display
+WIDTH, HEIGHT = 800, 600
+screen = pygame.display.set_mode((WIDTH, HEIGHT))
+pygame.display.set_caption("Pixelation Game")
+
+# Load an image (replace 'your_image.jpg' with your image file)
+original_image = Image.open('your_image.jpg')
+original_image = original_image.convert('RGB')
+image_array = np.array(original_image)
+
+clock = pygame.time.Clock()
+
+# Game loop
+running = True
+while running:
+    for event in pygame.event.get():
+        if event.type == pygame.QUIT:
+            running = False
+
+    # Get mouse position
+    mouse_pos = pygame.mouse.get_pos()
+    
+    # Calculate pixelation based on y position (closer to top, more pixelation)
+    pixelation = int(20 - (mouse_pos[1] / HEIGHT * 20))  # 20 is max pixelation at the top
+    
+    # Pixelate the image
+    if pixelation > 1:
+        h, w = image_array.shape[:2]
+        smaller_image = Image.fromarray(image_array).resize((w // pixelation, h // pixelation), Image.NEAREST)
+        pixelated_image = np.array(smaller_image.resize((w, h), Image.NEAREST))
+    else:
+        pixelated_image = image_array
+    
+    # Convert back to Pygame surface
+    pygame_surface = pygame.surfarray.make_surface(pixelated_image)
+
+    # Clear the screen
+    screen.fill((0, 0, 0))
+    
+    # Draw the pixelated image
+    screen.blit(pygame_surface, (0, 0))
+    
+    pygame.display.flip()
+    clock.tick(60)  # 60 fps
+
+pygame.quit()
+sys.exit()
